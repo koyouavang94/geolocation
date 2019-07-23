@@ -1,0 +1,156 @@
+﻿@page
+@model personal.project.Pages.UrgentCare.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    if (Model.currentUser.AdminType == "Top-Admin")
+    {
+     
+        <div class="container-fluid" style="margin-left:5rem;">
+        <p>
+            <a asp-page="Create">Create New</a>
+        </p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.UrgentCareLocate[0].Longitude)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.UrgentCareLocate[0].Latitude)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.UrgentCareLocate[0].PlaceName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.UrgentCareLocate[0].FullAddress)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.UrgentCareLocate[0].LocationHours)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.UrgentCareLocate)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Longitude)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Latitude)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PlaceName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.FullAddress)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.LocationHours)
+                        </td>
+                        <td>
+                            <a asp-page="./Edit" asp-route-id="@item.LocationID">Edit</a> |
+                            <a asp-page="./Details" asp-route-id="@item.LocationID">Details</a> |
+                            <a asp-page="./Delete" asp-route-id="@item.LocationID">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+            </div>
+    }
+}
+
+<div class="container-fluid">
+    <div class="row" style="text-align:center;">
+        <h1>Urgent Cares in your Area</h1>
+    </div>
+    <hr />
+
+    <div class="row" style="margin-left:5rem;">
+        <div class="col-lg-6 col-md-6 col-sm-6">
+            <h4 style="text-align:center;">Urgent cares treat patients with non-life threatening illnesses or injuries who need attention quickly. Appointments are not required and hours are usually from 7am-9pm.</h4>
+
+            <h4 class="row" style="text-align:center;color:orangered;">Please call 911 if it is an emergency</h4>
+            <br />
+            <h4 style="text-align:center;">Urgent Care Services:</h4>
+            <ul>
+                <li>Accidents and falls</li>
+                <li>Cuts that don’t involve much blood but might need stitches</li>
+                <li>Breathing difficulties, such as mild to moderate asthma</li>
+                <li>Diagnostic services, including X-rays and laboratory tests</li>
+                <li>Eye irritation and redness</li>
+                <li>Fever or flu</li>
+                <li>Minor broken bones and fractures in fingers or toes</li>
+                <li>Moderate back problems</li>
+                <li>Severe sore throat or cough</li>
+                <li>Skin rashes and infections</li>
+                <li>Sprains and strains</li>
+                <li>Urinary tract infections</li>
+                <li>Vomiting, diarrhea, or dehydration</li>
+                <li>Vaccinations</li>
+            </ul>
+        </div>
+
+
+        <div class="col-lg-6 col-md-6 col-sm-12" style="position:center;padding-bottom:2rem;">
+            <div id="map" style="width: 600px; height: 600px;" alt="Google Map"></div>
+        </div>
+    </div>
+</div>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDu7olipwC4ZA8c5dAG0fVKOmRAxAIN-8s&callback=myLocation">
+</script>
+
+<script>
+    function myLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(myPosition);
+    } else {
+        alert('Geolocation is not supported');
+    }
+}
+
+function myPosition(position) {
+    var location = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+    }
+    // map
+    var map = new google.maps.Map(
+        document.getElementById('map'),
+        { zoom: 15, center: location }
+    );
+
+    //Marker pointing to the user's current position
+    var currentMarker = new google.maps.Marker({
+        position: location,
+        map: map,
+        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        title: 'You are here',
+        optimized: false
+    });
+
+    //for loop creating the markers
+    var locs = JSON.parse('@Html.Raw(Json.Serialize(Model.UrgentCareLocate))');
+
+    for (var i = 0; i < locs.length; i++) {
+        console.log(locs[i]);
+        console.log(locs[i].latitude);
+        console.log(locs[i].longitude);
+        console.log(locs[i].placeName);
+        var marker = new google.maps.Marker({
+            position: { lat: locs[i].latitude, lng: locs[i].longitude },
+            map: map,
+            title: locs[i].placeName,
+            optimized: false
+        });
+    }
+};
+</script>
